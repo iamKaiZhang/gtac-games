@@ -38,7 +38,7 @@ function render() {
   const side = h('div', {});
   if (r.status === 'open' || r.status === 'closed') side.append(renderProgress(r));
   if (r.status === 'revealed') side.append(renderHistory(r));
-  if (view.braess.theoryRevealed && view.braess.theory && (r.game === 'braess' || view.history.some((x) => x.game === 'braess'))) side.append(renderTheory(view.braess.theory));
+  if (view.braess.theoryRevealed && view.braess.theory && r.game === 'braess') side.append(renderTheory(view.braess.theory));
   app.append(h('div', { class: 'body' }, main, side));
 }
 
