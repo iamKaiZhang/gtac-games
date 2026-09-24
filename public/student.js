@@ -60,11 +60,12 @@ function renderJoin(prefill = code, note = null) {
     ws.send({ type: 'join', code: c, nickname: n, playerId: localStorage.getItem('gtc_player_' + c) || undefined });
   };
   app.append(
-    h('div', { class: 'card', style: { marginTop: '24px' } },
-      h('h1', {}, 'Join the session'),
-      note ? h('p', { class: 'muted' }, note) : h('p', { class: 'muted' }, 'No account needed. Pick a nickname that others in the room can recognise.'),
-      h('label', {}, 'Session code'), codeInput,
+    h('div', { class: 'join-page' },
+      h('h1', {}, 'Enter the code to join'),
+      h('p', { class: 'sub' }, note || "It's on the screen in front of you"),
+      h('label', {}, 'Code'), codeInput,
       h('div', { class: 'mt' }), h('label', {}, 'Nickname'), nick,
+      h('p', { class: 'small muted', style: { textAlign: 'left', marginTop: '6px' } }, 'No account needed. Pick a name others in the room can recognise.'),
       err,
       h('button', { class: 'btn btn-primary btn-lg mt', onclick: go }, 'Join'),
     ),
@@ -98,9 +99,8 @@ function render() {
 function renderRound(r) {
   const card = h('div', { id: 'round' });
   if (!r) {
-    card.append(h('div', { class: 'card center', style: { marginTop: '24px' } },
-      h('div', { class: 'big' }, '👋'),
-      h('h1', {}, `You're in, ${view.nickname}!`),
+    card.append(h('div', { class: 'join-page' },
+      h('h1', {}, `You're in, ${view.nickname}`),
       h('p', { class: 'muted' }, 'Keep this page open. The instructor will start a game shortly.'),
       h('p', { class: 'small muted' }, `${view.playerCount} joined`)));
     return card;
@@ -205,7 +205,7 @@ function renderResult(r) {
   if (r.game === 'beauty') {
     const mine = res.mine;
     box.append(h('div', { class: 'card' + (mine?.winner ? ' ok' : '') },
-      mine?.winner ? h('div', { class: 'big' }, '🏆 You won!') : null,
+      mine?.winner ? h('div', { class: 'big', style: { marginBottom: '12px' } }, 'You won!') : null,
       h('div', { class: 'stats' },
         h('div', { class: 'stat' }, h('div', { class: 'v' }, fmt(res.target)), h('div', { class: 'k' }, 'Target (⅔ of mean)')),
         h('div', { class: 'stat' }, h('div', { class: 'v' }, fmt(res.mean)), h('div', { class: 'k' }, `Mean of ${res.n}`)),
@@ -257,7 +257,7 @@ function renderHistory() {
   wrap.append(h('div', { class: 'card' }, h('ul', { class: 'history' }, past.slice().reverse().map((x) => {
     const m = x.result?.mine;
     let text = '—';
-    if (x.game === 'beauty') text = m ? `guess ${m.value}, target ${fmt(x.result.target)}, off by ${fmt(m.distance)}${m.winner ? ' 🏆' : ''}` : 'no submission';
+    if (x.game === 'beauty') text = m ? `guess ${m.value}, target ${fmt(x.result.target)}, off by ${fmt(m.distance)}${m.winner ? ' (won)' : ''}` : 'no submission';
     if (x.game === 'braess') text = m ? `${ROUTE_META[m.route].label}, time ${fmt(m.time, 1)} (avg ${fmt(x.result.average, 1)})` : 'no submission';
     if (x.game === 'pgg') text = m ? (m.status === 'scored' ? `gave ${m.contribution}, payoff ${fmt(m.payoff)}` : m.status) : 'no submission';
     return h('li', {}, h('span', {}, h('b', {}, `${GAME_NAMES[x.game]} ${x.index}`), x.game === 'braess' ? h('span', { class: 'small muted' }, x.roadOpen ? ' · road open' : ' · road closed') : null), h('span', { class: 'small' }, text));

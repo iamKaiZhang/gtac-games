@@ -24,9 +24,9 @@ function render() {
   clear(app);
   const r = view.round;
   app.append(h('div', { class: 'head' },
-    h('div', { class: 'join' }, 'Go to ', h('span', { style: { color: 'var(--primary)', fontWeight: 900 } }, shortUrl.replace(/\/j\/.*/, '')), ' and enter code', h('b', {}, view.code)),
+    h('div', { class: 'go' }, 'Go to ', h('b', {}, shortUrl.replace(/\/j\/.*/, '')), ' and use the code', h('span', { class: 'code' }, view.code)),
     h('div', { class: 'row', style: { gap: '28px' } },
-      h('div', { class: 'stat' }, h('div', { class: 'v', style: { fontSize: '40px' } }, view.playerCount), h('div', { class: 'k' }, 'joined')),
+      h('div', { class: 'stat' }, h('div', { class: 'v', style: { fontSize: '36px' } }, view.playerCount), h('div', { class: 'k' }, 'joined')),
       r ? h('span', { class: 'pill ' + r.status }, STATUS_LABEL[r.status]) : null,
       !connected ? h('span', { class: 'pill closed' }, 'reconnecting…') : null,
       r ? qr('qr mini') : null),
@@ -55,31 +55,31 @@ function renderLobby() {
 function renderProgress(r) {
   const pct = r.expected ? (r.submitted / r.expected) * 100 : 0;
   return h('div', { class: 'card' },
-    h('div', { class: 'stat' }, h('div', { class: 'v', style: { fontSize: '84px' } }, `${r.submitted}`, h('span', { style: { fontSize: '40px', color: 'var(--muted)' } }, ` / ${r.expected}`)), h('div', { class: 'k' }, r.status === 'open' ? 'submitted so far' : 'submitted')),
+    h('div', { class: 'stat' }, h('div', { class: 'v', style: { fontSize: '84px' } }, `${r.submitted}`, h('span', { style: { fontSize: '40px', color: 'var(--text-2)' } }, ` / ${r.expected}`)), h('div', { class: 'k' }, r.status === 'open' ? 'submitted so far' : 'submitted')),
     h('div', { class: 'progress mt', style: { height: '28px' } }, h('div', { style: { width: `${pct}%` } })),
     r.status === 'open' ? h('p', { class: 'muted mt', style: { fontSize: '22px' } }, 'You can change your answer until voting closes.') : h('p', { class: 'muted mt', style: { fontSize: '22px' } }, 'Voting is closed. Results coming up…'));
 }
 
 function renderInstructions(r) {
-  const box = h('div', {}, h('h1', {}, `${GAME_NAMES[r.game]}`, h('span', { class: 'muted', style: { fontWeight: 600 } }, ` · Round ${r.index}`)), h('p', {}, INSTRUCTIONS[r.game]));
+  const box = h('div', {}, h('h1', {}, `${GAME_NAMES[r.game]}`, h('span', { class: 'sub' }, ` · Round ${r.index}`)), h('p', {}, INSTRUCTIONS[r.game]));
   if (r.game === 'beauty') box.append(h('p', { class: 'muted' }, 'Example: if the average of all numbers is 30, the target is 20.'));
-  if (r.game === 'braess') box.append(h('div', { class: 'card', style: { maxWidth: '760px' } }, networkSVG({ roadOpen: r.config.roadOpen })), h('p', {}, r.config.roadOpen ? '🚧 The new road A → B is now OPEN with travel time 0. A third route S → A → B → T is available.' : 'The road A → B is closed. Choose the upper route (S → A → T) or the lower route (S → B → T).'), h('p', { class: 'muted' }, 'x = number of drivers on S → A, y = number on B → T, N = number of drivers who submitted. Congestion depends on what the class actually chooses.'));
+  if (r.game === 'braess') box.append(h('div', { class: 'card', style: { maxWidth: '760px' } }, networkSVG({ roadOpen: r.config.roadOpen })), h('p', {}, r.config.roadOpen ? 'The new road A → B is now open with travel time 0. A third route S → A → B → T is available.' : 'The road A → B is closed. Choose the upper route (S → A → T) or the lower route (S → B → T).'), h('p', { class: 'muted' }, 'x = number of drivers on S → A, y = number on B → T, N = number of drivers who submitted. Congestion depends on what the class actually chooses.'));
   if (r.game === 'pgg') box.append(h('p', {}, `Payoff = 10 − your contribution + 2 × (group total) ÷ (group size).`), h('p', { class: 'muted' }, `${r.config.groupCount} groups (sizes ${r.config.sizes.join(', ')}). Your group is shown on your phone. Groups stay the same in every round.`));
   return box;
 }
 
 function renderResults(r) {
   const res = r.result;
-  const box = h('div', {}, h('h1', {}, `${GAME_NAMES[r.game]}`, h('span', { class: 'muted', style: { fontWeight: 600 } }, ` · Round ${r.index} results`)));
+  const box = h('div', {}, h('h1', {}, `${GAME_NAMES[r.game]}`, h('span', { class: 'sub' }, ` · Round ${r.index} results`)));
   if (r.game === 'beauty') {
     if (!res.n) return box.append(h('p', {}, 'No submissions in this round.')), box;
     box.append(h('div', { class: 'stats mb' },
       h('div', { class: 'stat' }, h('div', { class: 'v' }, fmt(res.mean)), h('div', { class: 'k' }, 'mean')),
-      h('div', { class: 'stat' }, h('div', { class: 'v', style: { color: '#ff5c8a' } }, fmt(res.target)), h('div', { class: 'k' }, 'target = ⅔ × mean')),
+      h('div', { class: 'stat' }, h('div', { class: 'v', style: { color: 'var(--blue-700)' } }, fmt(res.target)), h('div', { class: 'k' }, 'target = ⅔ × mean')),
       h('div', { class: 'stat' }, h('div', { class: 'v' }, res.n), h('div', { class: 'k' }, 'submissions'))));
     const bins = res.histogram.map((b) => ({ label: `${b.from}–${b.to === 100 ? 100 : b.to - 1}`, count: b.count }));
-    box.append(h('div', { class: 'card' }, histogram({ bins, axis: ['0', '25', '50', '75', '100'], markers: [{ pos: res.mean / 100, label: `mean ${fmt(res.mean, 1)}`, color: '#ffc84a' }, { pos: res.target / 100, label: `target ${fmt(res.target, 1)}`, color: '#ff5c8a' }] })));
-    box.append(h('div', { class: 'card', style: { background: 'var(--primary-soft)' } }, h('p', { style: { margin: 0 } }, `🏆 Winner${res.winners.length > 1 ? 's' : ''}: `, h('b', {}, res.winners.map((w) => `${w.nickname} (${w.value})`).join(', ')))));
+    box.append(h('div', { class: 'card' }, histogram({ bins, axis: ['0', '25', '50', '75', '100'], markers: [{ pos: res.mean / 100, label: `mean ${fmt(res.mean, 1)}`, color: 'var(--yellow)' }, { pos: res.target / 100, label: `target ${fmt(res.target, 1)}`, color: 'var(--coral)' }] })));
+    box.append(h('div', { class: 'card', style: { background: 'var(--yellow-soft)', borderColor: 'transparent' } }, h('p', { style: { margin: 0 } }, `Winner${res.winners.length > 1 ? 's' : ''}: `, h('b', {}, res.winners.map((w) => `${w.nickname} (${w.value})`).join(', ')))));
   } else if (r.game === 'braess') {
     if (!res.N) return box.append(h('p', {}, 'No submissions in this round.')), box;
     const routes = ['upper', 'lower', ...(res.roadOpen ? ['shortcut'] : [])];
@@ -108,14 +108,14 @@ function renderHistory(r) {
   const same = view.history.filter((x) => x.game === r.game);
   if (same.length < 2) return h('div', {});
   const box = h('div', { class: 'card' }, h('h3', {}, `${GAME_NAMES[r.game]} · round by round`));
-  if (r.game === 'beauty') box.append(hbars(same.map((x) => ({ label: `Round ${x.index}`, value: x.result.target ?? 0, display: x.result.n ? `target ${fmt(x.result.target, 1)}` : '–', color: '#ff5c8a' }))));
-  if (r.game === 'braess') box.append(hbars(same.map((x) => ({ label: `Round ${x.index} · ${x.roadOpen ? 'open' : 'closed'}`, value: x.result.average ?? 0, display: x.result.N ? `avg ${fmt(x.result.average, 1)}` : '–', color: x.roadOpen ? 'var(--pink)' : 'var(--primary)' }))), h('div', { class: 'legend' }, h('span', {}, h('i', { style: { background: 'var(--primary)' } }), 'road closed'), h('span', {}, h('i', { style: { background: 'var(--pink)' } }), 'road open')));
+  if (r.game === 'beauty') box.append(hbars(same.map((x) => ({ label: `Round ${x.index}`, value: x.result.target ?? 0, display: x.result.n ? `target ${fmt(x.result.target, 1)}` : '–', color: 'var(--coral)' }))));
+  if (r.game === 'braess') box.append(hbars(same.map((x) => ({ label: `Round ${x.index} · ${x.roadOpen ? 'open' : 'closed'}`, value: x.result.average ?? 0, display: x.result.N ? `avg ${fmt(x.result.average, 1)}` : '–', color: x.roadOpen ? 'var(--coral)' : 'var(--blue)' }))), h('div', { class: 'legend' }, h('span', {}, h('i', { style: { background: 'var(--blue)' } }), 'road closed'), h('span', {}, h('i', { style: { background: 'var(--coral)' } }), 'road open')));
   if (r.game === 'pgg') box.append(hbars(same.map((x) => ({ label: `Round ${x.index}`, value: x.result.avgContribution ?? 0, display: x.result.nScored ? `avg ${fmt(x.result.avgContribution, 1)}` : '–', color: 'var(--green)' }))), h('div', { class: 'legend' }, h('span', {}, 'average contribution per round (0–10)')));
   return box;
 }
 
 function renderTheory(t) {
-  return h('div', { class: 'card', style: { borderLeft: '6px solid var(--yellow)' } }, h('h3', {}, `Theory · N = ${t.N} drivers`),
+  return h('div', { class: 'card', style: { background: 'var(--yellow-soft)', borderColor: 'transparent' } }, h('h3', {}, `Theory · N = ${t.N} drivers`),
     h('p', {}, h('b', {}, 'Road closed: '), `split ${t.closed.split.upper} / ${t.closed.split.lower} gives ${fmt(t.closed.times.upper, 1)} and ${fmt(t.closed.times.lower, 1)}.`, t.N % 2 === 0 ? ' Everyone takes 16.' : '', t.closed.deviateToLower !== null ? ` Switching alone to the lower route would take ${fmt(t.closed.deviateToLower, 1)}.` : ''),
     h('p', {}, h('b', {}, 'Road open: '), `everyone on the shortcut takes ${fmt(t.open.allShortcut, 1)}. A lone driver switching to an outer route takes ${fmt(t.open.deviateToUpper, 1)}, so nobody wants to switch: a Nash equilibrium that is worse for everyone than 16.`));
 }

@@ -101,10 +101,10 @@ function renderSession() {
   app.append(
     h('div', { class: 'row between mb' },
       h('div', { class: 'row' }, h('button', { class: 'btn btn-sm', onclick: () => { attachedCode = null; localStorage.removeItem('gtc_host_code'); cmd('detach'); } }, '← All sessions'),
-        h('span', { class: 'big', style: { letterSpacing: '0.15em' } }, v.code), v.rehearsal ? h('span', { class: 'pill closed' }, 'REHEARSAL') : null),
+        h('span', { class: 'big', style: { letterSpacing: '0.15em' } }, v.code), v.rehearsal ? h('span', { class: 'pill rehearsal' }, 'Rehearsal') : null),
       h('div', { class: 'row' },
-        h('a', { class: 'btn btn-sm', href: `/screen/${v.code}`, target: '_blank' }, '🖥 Open projector view'),
-        h('a', { class: 'btn btn-sm', href: `/api/export/${v.code}.csv?key=${encodeURIComponent(key)}` }, '⬇ Export CSV'))),
+        h('a', { class: 'btn btn-sm', href: `/screen/${v.code}`, target: '_blank' }, 'Open projector view'),
+        h('a', { class: 'btn btn-sm', href: `/api/export/${v.code}.csv?key=${encodeURIComponent(key)}` }, 'Export CSV'))),
     h('div', { class: 'card soft small' }, 'Students join at ', h('b', {}, joinUrl), ' or enter code ', h('b', {}, v.code), ' at ', h('b', {}, location.origin), '. The projector view shows the QR code.'),
     h('div', { style: { display: 'grid', gridTemplateColumns: 'minmax(0, 2fr) minmax(280px, 1fr)', gap: '16px' }, class: 'session-grid' },
       h('div', {}, renderGameTabs(), renderRoundPanel(), renderRoundHistory()),
@@ -124,7 +124,7 @@ function renderGameTabs() {
     const open = v.braess.roadOpen;
     box.append(h('div', { class: 'row between' },
       h('div', {}, h('b', {}, `New road A → B: ${open ? 'OPEN' : 'CLOSED'}`), h('div', { class: 'small muted' }, 'Applies to the next round (and to a round still in Waiting).')),
-      h('button', { class: 'btn ' + (open ? 'btn-danger' : 'btn-primary'), disabled: locked, onclick: () => cmd('setRoad', { open: !open }) }, open ? 'Close the road' : '🚧 Open the new road')));
+      h('button', { class: 'btn ' + (open ? 'btn-danger' : 'btn-primary'), disabled: locked, onclick: () => cmd('setRoad', { open: !open }) }, open ? 'Close the road' : 'Open the new road')));
     box.append(h('div', { class: 'row between mt' },
       h('div', {}, h('b', {}, `Theory panel on projector: ${v.braess.theoryRevealed ? 'SHOWN' : 'hidden'}`), h('div', { class: 'small muted' }, 'Equal split 16 · all on shortcut 20 · lone deviator 21. Reveal after the game so it does not spoil it.')),
       h('button', { class: 'btn btn-sm', onclick: () => cmd('revealTheory', { shown: !v.braess.theoryRevealed }) }, v.braess.theoryRevealed ? 'Hide theory' : 'Show theory')));
@@ -134,8 +134,8 @@ function renderGameTabs() {
     const n = v.players.length;
     box.append(h('div', { class: 'row between' },
       h('div', {}, h('b', {}, g ? `${g.length} groups (sizes ${g.map((x) => x.length).join(', ')})` : 'No groups yet'), h('div', { class: 'small muted' }, `Groups of 4 by default; leftovers form groups of 3 to 5. ${n} players joined, need at least ${v.pgg.minPlayers}. Groups persist across rounds.`)),
-      g ? (locked ? h('button', { class: 'btn', disabled: true }, '🔀 Regroup') : confirmBtn('regroup', '🔀 Regroup', 'Shuffle everyone into new groups?', () => cmd('makeGroups', { size: 4 }), 'btn'))
-        : h('button', { class: 'btn btn-primary', disabled: locked || n < v.pgg.minPlayers, onclick: () => cmd('makeGroups', { size: 4 }) }, '👥 Make groups')));
+      g ? (locked ? h('button', { class: 'btn', disabled: true }, 'Regroup') : confirmBtn('regroup', 'Regroup', 'Shuffle everyone into new groups?', () => cmd('makeGroups', { size: 4 }), 'btn'))
+        : h('button', { class: 'btn btn-primary', disabled: locked || n < v.pgg.minPlayers, onclick: () => cmd('makeGroups', { size: 4 }) }, 'Make groups')));
     if (g) box.append(h('div', { class: 'grid cols-2 mt', style: { gap: '8px' } }, g.map((members, i) => h('div', { class: 'card soft small', style: { margin: 0, padding: '10px 14px' } }, h('b', {}, `Group ${i + 1}`), ' · ', members.join(', ')))));
     const ungrouped = v.players.filter((p) => !(v.pgg.groups || []).flat().includes(p.id));
     if (g && ungrouped.length) box.append(h('div', { class: 'card warn small mt', style: { marginBottom: 0 } }, `Not in any group (joined after grouping): ${ungrouped.map((p) => p.nickname).join(', ')}. Regroup between rounds to include them.`));
@@ -150,7 +150,7 @@ function renderRoundPanel() {
   if (!r) {
     const canStart = tab !== 'pgg' || !!v.pgg.groups;
     box.append(h('h3', {}, 'Round'), h('p', { class: 'muted' }, 'No round running. Students see a waiting screen.'),
-      h('button', { class: 'btn btn-primary btn-lg', disabled: !canStart, onclick: () => cmd('startRound', { game: tab }) }, `▶ Start ${GAME_NAMES[tab]} round ${v.rounds.filter((x) => x.game === tab).length + 1}`));
+      h('button', { class: 'btn btn-primary btn-lg', disabled: !canStart, onclick: () => cmd('startRound', { game: tab }) }, `Start ${GAME_NAMES[tab]} round ${v.rounds.filter((x) => x.game === tab).length + 1}`));
     if (!canStart) box.append(h('p', { class: 'small muted mt' }, 'Make groups first.'));
     return box;
   }
@@ -163,16 +163,16 @@ function renderRoundPanel() {
   if (p.missing && (r.status === 'open' || r.status === 'closed')) box.append(h('p', { class: 'small muted mt' }, `Missing (${p.missing}): ${p.missingNames.join(', ')}`));
   // actions
   const actions = h('div', { class: 'row mt' });
-  if (r.status === 'waiting') actions.append(h('button', { class: 'btn btn-primary btn-lg', onclick: () => cmd('open') }, '🟢 Open voting'), h('button', { class: 'btn', onclick: () => cmd('cancel') }, 'Cancel round'));
+  if (r.status === 'waiting') actions.append(h('button', { class: 'btn btn-primary btn-lg', onclick: () => cmd('open') }, 'Open voting'), h('button', { class: 'btn', onclick: () => cmd('cancel') }, 'Cancel round'));
   if (r.status === 'open') actions.append(
     p.missing === 0
-      ? h('button', { class: 'btn btn-primary btn-lg', onclick: () => cmd('close') }, '⏹ Close voting')
-      : confirmBtn('close', `⏹ Close voting (${p.missing} missing)`, `${p.missing} of ${p.expected} have not submitted. Close anyway? Missing answers stay missing (never invented).`, () => cmd('close')),
+      ? h('button', { class: 'btn btn-primary btn-lg', onclick: () => cmd('close') }, 'Close voting')
+      : confirmBtn('close', `Close voting (${p.missing} missing)`, `${p.missing} of ${p.expected} have not submitted. Close anyway? Missing answers stay missing (never invented).`, () => cmd('close')),
     confirmBtn('cancel', 'Cancel round', 'Discard this round and its submissions?', () => cmd('cancel'), 'btn'));
-  if (r.status === 'closed') actions.append(h('button', { class: 'btn btn-primary btn-lg', onclick: () => cmd('reveal') }, '📊 Reveal results'), h('button', { class: 'btn', onclick: () => cmd('reopen') }, 'Reopen voting'));
+  if (r.status === 'closed') actions.append(h('button', { class: 'btn btn-primary btn-lg', onclick: () => cmd('reveal') }, 'Reveal results'), h('button', { class: 'btn', onclick: () => cmd('reopen') }, 'Reopen voting'));
   if (r.status === 'revealed') {
     const canStart = tab !== 'pgg' || !!v.pgg.groups;
-    actions.append(h('button', { class: 'btn btn-primary btn-lg', disabled: !canStart, onclick: () => cmd('startRound', { game: tab }) }, `▶ Start ${GAME_NAMES[tab]} round ${v.rounds.filter((x) => x.game === tab).length + 1}`));
+    actions.append(h('button', { class: 'btn btn-primary btn-lg', disabled: !canStart, onclick: () => cmd('startRound', { game: tab }) }, `Start ${GAME_NAMES[tab]} round ${v.rounds.filter((x) => x.game === tab).length + 1}`));
     if (!canStart) actions.append(h('span', { class: 'small muted' }, 'Make groups first.'));
   }
   box.append(actions);
@@ -206,7 +206,7 @@ function renderResults(r) {
         h('td', { class: 'num' }, `${g.submitted}/${g.size}`),
         h('td', { class: 'num' }, g.scored ? g.total : '–'),
         h('td', { class: 'num' }, g.scored ? fmt(g.share) : '–'),
-        h('td', {}, g.excluded ? h('span', { class: 'pill closed' }, 'excluded') : g.complete ? h('span', { class: 'pill revealed' }, 'scored') : h('span', { class: 'pill', style: { background: 'var(--red-soft)', color: 'var(--red)' } }, `missing: ${g.missingNames.join(', ')}`)),
+        h('td', {}, g.excluded ? h('span', { class: 'pill closed' }, 'excluded') : g.complete ? h('span', { class: 'pill revealed' }, 'scored') : h('span', { class: 'pill bad' }, `missing: ${g.missingNames.join(', ')}`)),
         h('td', { class: 'num' }, !g.complete || g.excluded ? h('button', { class: 'btn btn-sm', onclick: () => cmd('excludeGroup', { roundId: r.id, group: g.index, excluded: !g.excluded }) }, g.excluded ? 'Include again' : 'Exclude from scoring') : null),
       )))));
     if (res.incompleteGroups.length && r.status === 'closed') wrap.append(h('div', { class: 'card warn small mt' }, `${res.incompleteGroups.length} group(s) incomplete. Either reopen voting and wait, or exclude them; their members are not scored either way. Missing contributions are never counted as zero.`));
@@ -216,7 +216,7 @@ function renderResults(r) {
 
 export function beautyHistogram(res) {
   const bins = res.histogram.map((b) => ({ label: `${b.from}–${b.to === 100 ? 100 : b.to - 1}`, count: b.count }));
-  return h('div', { class: 'mt' }, histogram({ bins, axis: ['0', '25', '50', '75', '100'], markers: [{ pos: res.mean / 100, label: `mean ${fmt(res.mean, 1)}`, color: '#ffc84a' }, { pos: res.target / 100, label: `target ${fmt(res.target, 1)}`, color: '#ff5c8a' }] }));
+  return h('div', { class: 'mt' }, histogram({ bins, axis: ['0', '25', '50', '75', '100'], markers: [{ pos: res.mean / 100, label: `mean ${fmt(res.mean, 1)}`, color: 'var(--yellow)' }, { pos: res.target / 100, label: `target ${fmt(res.target, 1)}`, color: 'var(--coral)' }] }));
 }
 
 export function braessTable(res) {
@@ -247,10 +247,10 @@ function renderPlayers() {
   const v = view;
   const r = v.round;
   return h('div', { class: 'card' },
-    h('div', { class: 'row between' }, h('h3', { style: { margin: 0 } }, `Players · ${v.players.length}`), h('span', { class: 'pill on' }, `${v.connectedCount} online`)),
+    h('div', { class: 'row between' }, h('h3', { style: { margin: 0 } }, `Players · ${v.players.length}`), h('span', { class: 'pill' }, `${v.connectedCount} online`)),
     v.players.length ? h('table', { class: 't mt' }, h('tbody', {}, v.players.map((p) => h('tr', {},
-      h('td', {}, h('span', { class: 'dot' + (p.connected ? ' on' : ''), style: { marginRight: '8px' } }), p.nickname),
-      h('td', { class: 'num small muted' }, r && r.status !== 'waiting' && r.submissions[p.id] ? '✓' : ''),
-      h('td', { class: 'num' }, confirmBtn('remove:' + p.id, '✕', `Remove ${p.nickname}?`, () => cmd('removePlayer', { playerId: p.id }), 'btn btn-sm')),
+      h('td', {}, p.nickname, p.connected ? null : h('span', { class: 'small muted' }, ' (offline)')),
+      h('td', { class: 'num small muted' }, r && r.status !== 'waiting' && r.submissions[p.id] ? 'submitted' : ''),
+      h('td', { class: 'num' }, confirmBtn('remove:' + p.id, 'Remove', `Remove ${p.nickname}?`, () => cmd('removePlayer', { playerId: p.id }), 'btn btn-sm')),
     )))) : h('p', { class: 'muted mt' }, 'Nobody has joined yet. Show the projector view so students can scan the QR code.'));
 }

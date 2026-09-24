@@ -44,11 +44,12 @@ export const fmt = (n, d = 2) => (n === null || n === undefined || Number.isNaN(
 export const GAME_NAMES = { beauty: 'Beauty contest', braess: "Braess's paradox", pgg: 'Public goods' };
 export const STATUS_LABEL = { waiting: 'Waiting', open: 'Voting open', closed: 'Voting closed', revealed: 'Results revealed' };
 export const ROUTE_META = {
-  upper: { label: 'Upper route', path: 'S → A → T', color: 'var(--primary)' },
-  lower: { label: 'Lower route', path: 'S → B → T', color: 'var(--orange)' },
-  shortcut: { label: 'Shortcut', path: 'S → A → B → T', color: 'var(--pink)' },
+  upper: { label: 'Upper route', path: 'S → A → T', color: 'var(--blue)' },
+  lower: { label: 'Lower route', path: 'S → B → T', color: 'var(--yellow)' },
+  shortcut: { label: 'Shortcut', path: 'S → A → B → T', color: 'var(--coral)' },
 };
-export const PALETTE = ['#3454ff', '#ffc84a', '#ff5c8a', '#17b981', '#8b5cf6', '#ff8b3d'];
+// Mentimeter's chart palette: blue, yellow, coral, green, purple
+export const PALETTE = ['#5769e7', '#ffc738', '#ff7471', '#52ad6e', '#8e8eea'];
 
 export function toast(text, ms = 2500) {
   const t = h('div', { class: 'toast' }, text);
@@ -131,7 +132,7 @@ export function networkSVG({ roadOpen, route = null, edges = null, N = null, onP
 }
 
 /** Histogram with optional vertical markers. bins: [{label, count}], markers: [{pos 0..1, label, color}] */
-export function histogram({ bins, markers = [], axis = [], color = 'var(--primary)', showCounts = true }) {
+export function histogram({ bins, markers = [], axis = [], color = 'var(--blue)', showCounts = true }) {
   const max = Math.max(1, ...bins.map((b) => b.count));
   const wrap = h('div', { class: 'chart' });
   const bars = h('div', { class: 'bars' }, bins.map((b) => h('div', { class: 'bar', title: `${b.label}: ${b.count}` },
@@ -142,7 +143,7 @@ export function histogram({ bins, markers = [], axis = [], color = 'var(--primar
   markers.forEach((m, i) => {
     const left = `${Math.min(99.5, Math.max(0.5, m.pos * 100))}%`;
     // one label row per marker so close values (e.g. mean 53, target 35) never overlap
-    wrap.append(h('div', { class: 'marker' + (m.pos > 0.7 ? ' left' : ''), style: { left, background: m.color } }, h('span', { style: { background: m.color, color: '#111', top: `${i * 32}px` } }, m.label)));
+    wrap.append(h('div', { class: 'marker' + (m.pos > 0.7 ? ' left' : ''), style: { left, background: m.color } }, h('span', { style: { background: m.color, top: `${i * 32}px` } }, m.label)));
   });
   if (axis.length) wrap.append(h('div', { class: 'axis' }, axis.map((a) => h('span', {}, a))));
   return wrap;
@@ -152,7 +153,7 @@ export function hbars(rows) {
   const max = Math.max(1, ...rows.map((r) => r.value));
   return h('div', {}, rows.map((r) => h('div', { class: 'hbar' },
     h('div', {}, r.label),
-    h('div', { class: 'track' }, h('i', { style: { width: `${(r.value / max) * 100}%`, background: r.color || 'var(--primary)' } })),
+    h('div', { class: 'track' }, h('i', { style: { width: `${(r.value / max) * 100}%`, background: r.color || 'var(--blue)' } })),
     h('div', { class: 'num' }, r.display ?? r.value),
   )));
 }
