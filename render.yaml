@@ -1,0 +1,17 @@
+# Render Blueprint: https://render.com/docs/blueprint-spec
+# Free plan: sleeps after 15 idle minutes (about 1 minute to wake), ephemeral disk.
+services:
+  - type: web
+    name: gtc-games
+    runtime: node
+    plan: free
+    region: frankfurt
+    buildCommand: npm ci --omit=dev
+    startCommand: npm start
+    healthCheckPath: /healthz
+    autoDeploy: true
+    envVars:
+      - key: HOST_KEY
+        generateValue: true   # the private instructor key; read it in the Render dashboard under Environment
+      - key: NODE_ENV
+        value: production
