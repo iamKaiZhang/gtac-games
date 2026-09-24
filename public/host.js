@@ -30,17 +30,18 @@ const ws = connect({
 const cmd = (action, extra = {}) => ws.send({ type: 'host:' + action, key, ...extra });
 
 // Inline two-step confirmation (no native dialogs: they are blocked in some kiosk browsers).
-function confirmBtn(label, question, onYes, cls = 'btn btn-primary btn-lg') {
-  const b = h('button', { class: cls }, label);
-  b.addEventListener('click', () => {
-    const panel = h('span', { class: 'card warn', style: { display: 'inline-flex', flexWrap: 'wrap', gap: '10px', alignItems: 'center', margin: 0, padding: '10px 14px' } },
+// The pending id survives the full re-renders triggered by incoming submissions.
+let pendingConfirm = null;
+function confirmBtn(id, label, question, onYes, cls = 'btn btn-primary btn-lg') {
+  if (pendingConfirm === id) {
+    return h('span', { class: 'card warn', style: { display: 'inline-flex', flexWrap: 'wrap', gap: '10px', alignItems: 'center', margin: 0, padding: '10px 14px' } },
       h('span', { style: { fontWeight: 700 } }, question),
-      h('button', { class: 'btn btn-sm btn-primary', onclick: () => onYes() }, 'Yes'),
-      h('button', { class: 'btn btn-sm', onclick: () => panel.replaceWith(confirmBtn(label, question, onYes, cls)) }, 'No'));
-    b.replaceWith(panel);
-  });
-  return b;
+      h('button', { class: 'btn btn-sm btn-primary', onclick: () => { pendingConfirm = null; onYes(); } }, 'Yes'),
+      h('button', { class: 'btn btn-sm', onclick: () => { pendingConfirm = null; view ? renderSession() : renderLobby(); } }, 'No'));
+  }
+  return h('button', { class: cls, onclick: () => { pendingConfirm = id; view ? renderSession() : renderLobby(); } }, label);
 }
+
 function setConn(on) { $('#conn .dot').className = 'dot' + (on ? ' on' : ''); }
 
 function renderKeyGate(msg) {
@@ -75,7 +76,7 @@ function renderLobby() {
     h('td', { class: 'num' }, `${s.rounds} rounds`),
     h('td', { class: 'small muted' }, new Date(s.createdAt).toLocaleString()),
     h('td', { class: 'num' }, h('button', { class: 'btn btn-sm btn-primary', onclick: () => cmd('attach', { code: s.code }) }, 'Open'), ' ',
-      confirmBtn('Delete', `Delete ${s.code} and all its results?`, () => cmd('delete', { code: s.code }), 'btn btn-sm btn-danger')),
+      confirmBtn('delete:' + s.code, 'Delete', `Delete ${s.code} and all its results?`, () => cmd('delete', { code: s.code }), 'btn btn-sm btn-danger')),
   )))) : h('p', { class: 'muted' }, 'None yet.'));
   const backups = Object.keys(localStorage).filter((k) => k.startsWith('gtc_backup_')).map((k) => k.slice(11)).filter((c) => !sessions.some((s) => s.code === c));
   app.append(
@@ -133,7 +134,7 @@ function renderGameTabs() {
     const n = v.players.length;
     box.append(h('div', { class: 'row between' },
       h('div', {}, h('b', {}, g ? `${g.length} groups (sizes ${g.map((x) => x.length).join(', ')})` : 'No groups yet'), h('div', { class: 'small muted' }, `Groups of 4 by default; leftovers form groups of 3 to 5. ${n} players joined, need at least ${v.pgg.minPlayers}. Groups persist across rounds.`)),
-      g ? (locked ? h('button', { class: 'btn', disabled: true }, '🔀 Regroup') : confirmBtn('🔀 Regroup', 'Shuffle everyone into new groups?', () => cmd('makeGroups', { size: 4 }), 'btn'))
+      g ? (locked ? h('button', { class: 'btn', disabled: true }, '🔀 Regroup') : confirmBtn('regroup', '🔀 Regroup', 'Shuffle everyone into new groups?', () => cmd('makeGroups', { size: 4 }), 'btn'))
         : h('button', { class: 'btn btn-primary', disabled: locked || n < v.pgg.minPlayers, onclick: () => cmd('makeGroups', { size: 4 }) }, '👥 Make groups')));
     if (g) box.append(h('div', { class: 'grid cols-2 mt', style: { gap: '8px' } }, g.map((members, i) => h('div', { class: 'card soft small', style: { margin: 0, padding: '10px 14px' } }, h('b', {}, `Group ${i + 1}`), ' · ', members.join(', ')))));
     const ungrouped = v.players.filter((p) => !(v.pgg.groups || []).flat().includes(p.id));
@@ -166,8 +167,8 @@ function renderRoundPanel() {
   if (r.status === 'open') actions.append(
     p.missing === 0
       ? h('button', { class: 'btn btn-primary btn-lg', onclick: () => cmd('close') }, '⏹ Close voting')
-      : confirmBtn(`⏹ Close voting (${p.missing} missing)`, `${p.missing} of ${p.expected} have not submitted. Close anyway? Missing answers stay missing (never invented).`, () => cmd('close')),
-    confirmBtn('Cancel round', 'Discard this round and its submissions?', () => cmd('cancel'), 'btn'));
+      : confirmBtn('close', `⏹ Close voting (${p.missing} missing)`, `${p.missing} of ${p.expected} have not submitted. Close anyway? Missing answers stay missing (never invented).`, () => cmd('close')),
+    confirmBtn('cancel', 'Cancel round', 'Discard this round and its submissions?', () => cmd('cancel'), 'btn'));
   if (r.status === 'closed') actions.append(h('button', { class: 'btn btn-primary btn-lg', onclick: () => cmd('reveal') }, '📊 Reveal results'), h('button', { class: 'btn', onclick: () => cmd('reopen') }, 'Reopen voting'));
   if (r.status === 'revealed') {
     const canStart = tab !== 'pgg' || !!v.pgg.groups;
@@ -250,6 +251,6 @@ function renderPlayers() {
     v.players.length ? h('table', { class: 't mt' }, h('tbody', {}, v.players.map((p) => h('tr', {},
       h('td', {}, h('span', { class: 'dot' + (p.connected ? ' on' : ''), style: { marginRight: '8px' } }), p.nickname),
       h('td', { class: 'num small muted' }, r && r.status !== 'waiting' && r.submissions[p.id] ? '✓' : ''),
-      h('td', { class: 'num' }, confirmBtn('✕', `Remove ${p.nickname}?`, () => cmd('removePlayer', { playerId: p.id }), 'btn btn-sm')),
+      h('td', { class: 'num' }, confirmBtn('remove:' + p.id, '✕', `Remove ${p.nickname}?`, () => cmd('removePlayer', { playerId: p.id }), 'btn btn-sm')),
     )))) : h('p', { class: 'muted mt' }, 'Nobody has joined yet. Show the projector view so students can scan the QR code.'));
 }
