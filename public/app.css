@@ -212,7 +212,9 @@ table.t td.num, table.t th.num { text-align: right; font-variant-numeric: tabula
 .screen .marker span { font-size: 22px; top: 0; }
 .screen table.t { font-size: 24px; }
 .screen table.t th { font-size: 17px; }
-.screen .hbar { grid-template-columns: 300px 1fr 130px; font-size: 26px; }
+.screen .hbar { grid-template-columns: minmax(140px, 300px) 1fr auto; font-size: 26px; }
+.screen .body > div:last-child .hbar { font-size: 20px; }
+.screen .body > div:last-child .hbar .track { height: 30px; }
 .screen .hbar .track { height: 44px; }
 .screen .legend { font-size: 19px; }
 .screen .pill { font-size: 18px; padding: 8px 16px; }
@@ -227,7 +229,7 @@ table.t td.num, table.t th.num { text-align: right; font-variant-numeric: tabula
   .screen h1 { font-size: 30px; }
   .screen p, .screen li { font-size: 18px; }
   .hbar { grid-template-columns: 110px 1fr 70px; }
-  .screen .hbar { grid-template-columns: 140px 1fr 90px; font-size: 18px; }
+  .screen .hbar { grid-template-columns: minmax(110px, 140px) 1fr auto; font-size: 18px; }
 }
 @media (max-width: 800px) { .session-grid { grid-template-columns: 1fr !important; } }
 .pill:empty { display: none; }
