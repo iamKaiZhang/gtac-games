@@ -6,7 +6,7 @@ let authed = false;
 let sessions = [];
 let view = null;          // host view of the attached session
 let attachedCode = localStorage.getItem('gtc_host_code') || null;
-let tab = localStorage.getItem('gtc_host_tab') || 'beauty';
+let tab = 'beauty';
 
 const ws = connect({
   onOpen() { setConn(true); if (key) ws.send({ type: 'host:auth', key }); else renderKeyGate(); },
@@ -116,8 +116,8 @@ function renderGameTabs() {
   const v = view;
   const cur = v.round;
   const locked = cur && (cur.status === 'open' || cur.status === 'closed');
-  if (cur && !locked) tab = cur.game;
-  const tabs = h('div', { class: 'row mb' }, Object.entries(GAME_NAMES).map(([k, name]) => h('button', { class: 'btn btn-sm' + (tab === k ? ' selected' : ''), disabled: locked && k !== cur.game, onclick: () => { tab = k; localStorage.setItem('gtc_host_tab', k); cmd('selectGame', { game: k }); renderSession(); } }, name)));
+  tab = locked ? cur.game : v.game; // the server remembers the selected game; a running round pins it
+  const tabs = h('div', { class: 'row mb' }, Object.entries(GAME_NAMES).map(([k, name]) => h('button', { class: 'btn btn-sm' + (tab === k ? ' selected' : ''), disabled: locked && k !== cur.game, onclick: () => cmd('selectGame', { game: k }) }, name)));
   const box = h('div', { class: 'card' }, h('h3', {}, 'Game'), tabs);
   if (tab === 'braess') {
     const open = v.braess.roadOpen;
@@ -169,7 +169,11 @@ function renderRoundPanel() {
       : confirmBtn(`⏹ Close voting (${p.missing} missing)`, `${p.missing} of ${p.expected} have not submitted. Close anyway? Missing answers stay missing (never invented).`, () => cmd('close')),
     confirmBtn('Cancel round', 'Discard this round and its submissions?', () => cmd('cancel'), 'btn'));
   if (r.status === 'closed') actions.append(h('button', { class: 'btn btn-primary btn-lg', onclick: () => cmd('reveal') }, '📊 Reveal results'), h('button', { class: 'btn', onclick: () => cmd('reopen') }, 'Reopen voting'));
-  if (r.status === 'revealed') actions.append(h('button', { class: 'btn btn-primary btn-lg', onclick: () => cmd('startRound', { game: r.game }) }, `▶ New ${GAME_NAMES[r.game]} round`));
+  if (r.status === 'revealed') {
+    const canStart = tab !== 'pgg' || !!v.pgg.groups;
+    actions.append(h('button', { class: 'btn btn-primary btn-lg', disabled: !canStart, onclick: () => cmd('startRound', { game: tab }) }, `▶ Start ${GAME_NAMES[tab]} round ${v.rounds.filter((x) => x.game === tab).length + 1}`));
+    if (!canStart) actions.append(h('span', { class: 'small muted' }, 'Make groups first.'));
+  }
   box.append(actions);
   if (r.results && (r.status === 'closed' || r.status === 'revealed')) box.append(h('h3', { class: 'mt' }, r.status === 'closed' ? 'Preview (only you can see this until you reveal)' : 'Results'), renderResults(r));
   return box;

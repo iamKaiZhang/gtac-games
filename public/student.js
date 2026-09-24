@@ -174,7 +174,7 @@ function renderForm(r) {
     const btn = submitBtn(r.mine ? 'Update my route' : 'Submit route', () => sel, () => !!sel);
     const paint = () => {
       clear(diagramWrap).append(networkSVG({ roadOpen: r.config.roadOpen, route: sel, onPick: (x) => { sel = x; draft = { roundId: r.id, value: x }; paint(); } }));
-      clear(list).append(routes.map((k) => h('button', { class: 'route' + (sel === k ? ' selected' : ''), onclick: () => { sel = k; draft = { roundId: r.id, value: k }; paint(); } },
+      clear(list).append(...routes.map((k) => h('button', { class: 'route' + (sel === k ? ' selected' : ''), onclick: () => { sel = k; draft = { roundId: r.id, value: k }; paint(); } },
         h('span', { class: 'sw', style: { background: ROUTE_META[k].color } }),
         h('span', {}, h('div', { class: 't' }, ROUTE_META[k].label), h('div', { class: 'd' }, ROUTE_META[k].path + (k === 'upper' ? '  ·  10·x/N + 11' : k === 'lower' ? '  ·  11 + 10·y/N' : '  ·  10·x/N + 0 + 10·y/N'))))));
       btn.disabled = !sel;
@@ -189,7 +189,7 @@ function renderForm(r) {
     const info = h('p', { class: 'small muted mt' });
     const btn = submitBtn(r.mine ? 'Update my contribution' : 'Submit contribution', () => sel, () => sel !== null);
     const paint = () => {
-      clear(grid).append(Array.from({ length: 11 }, (_, v) => h('button', { class: 'choice' + (sel === v ? ' selected' : ''), onclick: () => { sel = v; draft = { roundId: r.id, value: v }; paint(); } }, v)));
+      clear(grid).append(...Array.from({ length: 11 }, (_, v) => h('button', { class: 'choice' + (sel === v ? ' selected' : ''), onclick: () => { sel = v; draft = { roundId: r.id, value: v }; paint(); } }, v)));
       info.textContent = sel === null ? 'Tap the number of tokens to contribute.' : `You keep ${10 - sel} token${10 - sel === 1 ? '' : 's'}; ${sel} go${sel === 1 ? 'es' : ''} into the pot, which is doubled and shared by all ${g.members.length} of you.`;
       btn.disabled = sel === null;
     };

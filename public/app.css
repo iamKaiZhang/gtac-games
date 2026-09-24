@@ -164,8 +164,8 @@ table.t td.num, table.t th.num { text-align: right; font-variant-numeric: tabula
 .net .edge.on { stroke: var(--primary); }
 .net .edge.dashed { stroke-dasharray: 10 10; }
 .net .node circle { fill: var(--surface); stroke: var(--text); stroke-width: 3; }
-.net .node text { font-weight: 800; font-size: 22px; fill: var(--text); text-anchor: middle; dominant-baseline: central; }
-.net .lbl { font-size: 15px; font-weight: 700; fill: var(--muted); text-anchor: middle; }
+.net .node text { font-weight: 800; font-size: 26px; fill: var(--text); text-anchor: middle; dominant-baseline: central; }
+.net .lbl { font-size: 22px; font-weight: 700; fill: var(--muted); text-anchor: middle; }
 .net .lbl.strong { fill: var(--text); }
 .net .hit { stroke: transparent; stroke-width: 28; fill: none; cursor: pointer; }
 
@@ -202,7 +202,7 @@ table.t td.num, table.t th.num { text-align: right; font-variant-numeric: tabula
 .screen .legend { font-size: 20px; }
 .screen .card { padding: 30px; }
 .screen .pill { font-size: 20px; padding: 8px 18px; }
-.screen .net .lbl { font-size: 20px; }
+.screen .net .lbl { font-size: 22px; }
 .screen .net .node text { font-size: 28px; }
 @media (max-width: 900px) {
   .screen .body { grid-template-columns: 1fr; }

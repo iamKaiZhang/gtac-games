@@ -70,7 +70,8 @@ test('views: students and projector never see submissions or aggregates before r
   S.openRound(s);
   S.submit(s, ids[0], 33);
   S.submit(s, ids[1], 66);
-  const asJson = (v) => JSON.stringify(v);
+  // ignore ids and timestamps, whose random digits could contain the guessed values by chance
+  const asJson = (v) => JSON.stringify(v, (k, x) => (/(^id$|Id$|^at$|At$|playerId)/.test(k) ? undefined : x));
   let sv = S.studentView(s, ids[1]);
   assert.equal(sv.round.mine.value, 66);
   assert.equal(sv.round.result, null);
