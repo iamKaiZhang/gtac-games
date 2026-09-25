@@ -79,7 +79,7 @@ function renderLobby() {
       confirmBtn('delete:' + s.code, 'Delete', `Delete ${s.code} and all its results?`, () => cmd('delete', { code: s.code }), 'btn btn-sm btn-danger')),
   )))) : h('p', { class: 'muted' }, 'None yet.'));
   const backups = Object.keys(localStorage).filter((k) => k.startsWith('gtc_backup_')).map((k) => k.slice(11)).filter((c) => !sessions.some((s) => s.code === c));
-  app.append(
+  app.append(h('div', {},
     h('h1', {}, 'Sessions'),
     create,
     list(sessions.filter((s) => !s.rehearsal), 'Real sessions'),
@@ -88,7 +88,7 @@ function renderLobby() {
       h('p', { class: 'small' }, 'These sessions are no longer on the server (for example after a server restart). Restoring puts them back exactly as this browser last saw them; students reconnect automatically.'),
       backups.map((c) => h('div', { class: 'row', style: { marginBottom: '8px' } }, h('b', {}, c), h('button', { class: 'btn btn-sm btn-primary', onclick: () => { try { cmd('restore', { session: JSON.parse(localStorage.getItem('gtc_backup_' + c)) }); } catch { toast('Backup unreadable'); } } }, 'Restore'), h('button', { class: 'btn btn-sm', onclick: () => { localStorage.removeItem('gtc_backup_' + c); renderLobby(); } }, 'Forget')))) : null,
     h('p', { class: 'small muted' }, h('a', { href: '#', onclick: (e) => { e.preventDefault(); localStorage.removeItem('gtc_host_key'); key = ''; renderKeyGate(); } }, 'Sign out')),
-  );
+  ));
 }
 
 // ------------------------------------------------------------- session view
@@ -100,7 +100,7 @@ function renderSession() {
   const joinUrl = `${location.origin}/j/${v.code}`;
   app.append(
     h('div', { class: 'row between mb' },
-      h('div', { class: 'row' }, h('button', { class: 'btn btn-sm', onclick: () => { attachedCode = null; localStorage.removeItem('gtc_host_code'); cmd('detach'); } }, '← All sessions'),
+      h('div', { class: 'row' }, h('button', { class: 'btn btn-sm', onclick: () => { attachedCode = null; localStorage.removeItem('gtc_host_code'); view = null; cmd('detach'); } }, '← All sessions'),
         h('span', { class: 'big', style: { letterSpacing: '0.15em' } }, v.code), v.rehearsal ? h('span', { class: 'pill rehearsal' }, 'Rehearsal') : null),
       h('div', { class: 'row' },
         h('a', { class: 'btn btn-sm', href: `/screen/${v.code}`, target: '_blank' }, 'Open projector view'),
