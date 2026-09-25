@@ -1,5 +1,5 @@
 {
-  "name": "gtc-games",
+  "name": "gtac-games",
   "version": "1.0.0",
   "description": "Multiplayer classroom games for a Game Theory and Control tutorial: beauty contest, Braess's paradox, public goods.",
   "private": true,

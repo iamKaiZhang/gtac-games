@@ -2,7 +2,7 @@
 #   fly launch --no-deploy --copy-config   # then: fly volumes create data --size 1 --region fra
 #   fly secrets set HOST_KEY=<long random string>
 #   fly deploy
-app = "gtc-games"
+app = "gtac-games"
 primary_region = "fra"
 
 [build]

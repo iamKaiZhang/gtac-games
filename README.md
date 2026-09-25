@@ -1,4 +1,4 @@
-# gtc-games
+# gtac-games
 
 Multiplayer classroom games for the *Game Theory and Control* tutorial:
 **beauty contest**, **Braess's paradox**, and a **public-goods game**.
@@ -173,7 +173,7 @@ fly deploy
 
 ### Anywhere with Docker or Node
 
-`docker build -t gtc-games . && docker run -p 3000:3000 -e HOST_KEY=... -v gtc-data:/data gtc-games`
+`docker build -t gtac-games . && docker run -p 3000:3000 -e HOST_KEY=... -v gtc-data:/data gtac-games`
 or simply `HOST_KEY=... node server.js`. Environment variables: `PORT`
 (default 3000), `HOST_KEY` (required in production), `DATA_DIR` (default
 `./data`).

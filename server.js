@@ -66,7 +66,7 @@ const server = http.createServer(async (req, res) => {
     if (!keyOk(url.searchParams.get('key'))) { res.writeHead(401, { 'Content-Type': 'text/plain' }); return res.end('unauthorized'); }
     const s = sessions[m[1].toUpperCase()];
     if (!s) { res.writeHead(404); return res.end('no such session'); }
-    res.writeHead(200, { 'Content-Type': 'text/csv; charset=utf-8', 'Content-Disposition': `attachment; filename="gtc-${s.code}${s.rehearsal ? '-rehearsal' : ''}.csv"` });
+    res.writeHead(200, { 'Content-Type': 'text/csv; charset=utf-8', 'Content-Disposition': `attachment; filename="gtac-${s.code}${s.rehearsal ? '-rehearsal' : ''}.csv"` });
     return res.end(sessionToCSV(s));
   }
   // static assets

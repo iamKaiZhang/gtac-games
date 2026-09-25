@@ -2,7 +2,7 @@
 # Free plan: sleeps after 15 idle minutes (about 1 minute to wake), ephemeral disk.
 services:
   - type: web
-    name: gtc-games
+    name: gtac-games
     runtime: node
     plan: free
     region: frankfurt
