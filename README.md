@@ -132,6 +132,10 @@ keeps a round history table.
   wiped, but the instructor browser keeps a live backup of the session. Open
   `/host`: under **Backups in this browser** press **Restore**. Students
   reconnect automatically with their identities and submissions intact.
+* **A student sees "No session with that code"**: the room they were in no
+  longer exists on the server (usually a restart). Restore the session from the
+  browser backup, then tell them to press **Join** again with the same code;
+  their phone still holds their identity, so they come back as the same player.
 * **Wrong key / lost key**: the key is the `HOST_KEY` environment variable of
   the deployment; read it in the hosting dashboard.
 * **Emergency fallback**: the app runs on any laptop with Node 22

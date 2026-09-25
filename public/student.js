@@ -12,6 +12,7 @@ let lastKey = '';         // re-render guard for the round card
 const ws = connect({
   onOpen() {
     setConn(true);
+    joined = false; // must be confirmed by the server again after every (re)connect
     if (code && playerId) ws.send({ type: 'join', code, playerId });
     else renderJoin();
   },
@@ -28,7 +29,17 @@ const ws = connect({
     if (m.type === 'state') { view = m.view; if (!view) return renderGone(); render(); return; }
     if (m.type === 'submitted') { toast('Submitted ✓'); return; }
     if (m.type === 'removed') { localStorage.removeItem('gtc_player_' + code); playerId = null; joined = false; renderJoin(code, 'The instructor removed you from the session. You can rejoin with a nickname.'); return; }
-    if (m.type === 'error') { showError(m.message); return; }
+    if (m.type === 'error') {
+      if (!joined && !$('#err')) {
+        // An automatic rejoin failed (room gone after a server restart, or deleted): show the
+        // join form with the reason. The stored identity is kept on purpose: if the instructor
+        // restores the session, pressing Join with the same code reattaches the old player.
+        renderJoin(code, m.message);
+        return;
+      }
+      showError(m.message);
+      return;
+    }
   },
 });
 
@@ -46,6 +57,7 @@ function showError(msg) {
 
 function renderJoin(prefill = code, note = null) {
   joined = false;
+  lastKey = '';
   clear(app);
   const codeInput = h('input', { class: 'input code', maxlength: 4, autocomplete: 'off', autocapitalize: 'characters', placeholder: 'CODE', value: prefill || '' });
   const nick = h('input', { class: 'input', maxlength: 20, autocomplete: 'off', placeholder: 'e.g. Ada', value: localStorage.getItem('gtc_nick') || '' });
@@ -62,7 +74,8 @@ function renderJoin(prefill = code, note = null) {
   app.append(
     h('div', { class: 'join-page' },
       h('h1', {}, 'Enter the code to join'),
-      h('p', { class: 'sub' }, note || "It's on the screen in front of you"),
+      h('p', { class: 'sub' }, "It's on the screen in front of you"),
+      note ? h('div', { class: 'card warn', style: { textAlign: 'left' } }, note) : null,
       h('label', {}, 'Code'), codeInput,
       h('div', { class: 'mt' }), h('label', {}, 'Nickname'), nick,
       h('p', { class: 'small muted', style: { textAlign: 'left', marginTop: '6px' } }, 'No account needed. Pick a name others in the room can recognise.'),
