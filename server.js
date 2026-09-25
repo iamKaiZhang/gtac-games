@@ -263,4 +263,4 @@ setInterval(() => {
 
 for (const sig of ['SIGINT', 'SIGTERM']) process.on(sig, () => { store.flush(); process.exit(0); });
 
-server.listen(PORT, () => console.log(`gtc-games listening on http://localhost:${PORT}  (data: ${DATA_DIR})`));
+server.listen(PORT, () => console.log(`gtac-games listening on http://localhost:${PORT}  (data: ${DATA_DIR})`));
