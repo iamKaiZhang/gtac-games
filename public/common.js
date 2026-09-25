@@ -57,11 +57,39 @@ export function toast(text, ms = 2500) {
   setTimeout(() => t.remove(), ms);
 }
 
-export const INSTRUCTIONS = {
-  beauty: 'Choose an integer from 0 to 100. The number closest to two-thirds of the average of all submitted numbers wins. Your own number counts toward the average. Choose independently. Ties share the win.',
-  braess: 'You are a driver going from S to T. Travel times on S → A and B → T depend on how many drivers actually choose them: 10 × (share of drivers on that road). A → T and S → B take a fixed 11. Pick the route you expect to be fastest.',
-  pgg: 'You receive 10 tokens. Choose how many (0 to 10) to put into your group\'s pot; you keep the rest. The pot is doubled and split equally among everyone in your group, whatever they contributed.',
+// Instructions as slide-style points. A segment is plain text or { hl } for a highlighted mark.
+export const POINTS = {
+  beauty: () => [
+    ['Choose an integer from ', { hl: '0 to 100' }, '.'],
+    ['The number closest to ', { hl: '⅔ of the average' }, ' of all submitted numbers wins.'],
+    ['Your own number counts toward the average.'],
+    ['Choose independently. Ties share the win.'],
+  ],
+  braess: ({ roadOpen } = {}) => [
+    ['You are a driver going from ', { hl: 'S' }, ' to ', { hl: 'T' }, '.'],
+    [{ hl: 'S → A' }, ' and ', { hl: 'B → T' }, ': travel time 10 × the share of drivers on that road.'],
+    [{ hl: 'A → T' }, ' and ', { hl: 'S → B' }, ': fixed travel time 11.'],
+    roadOpen
+      ? [{ hl: 'A → B' }, ' is open with travel time 0, so the shortcut S → A → B → T is available.']
+      : ['Choose the upper route (S → A → T) or the lower route (S → B → T).'],
+    ['Pick the route you expect to be fastest. Congestion depends on what the class actually chooses.'],
+  ],
+  pgg: () => [
+    ['You receive ', { hl: '10 tokens' }, '.'],
+    ['Contribute ', { hl: '0 to 10' }, " to your group's pot and keep the rest."],
+    ['The pot is ', { hl: 'doubled' }, ' and split ', { hl: 'equally' }, ' among everyone in your group, whatever each person gave.'],
+  ],
 };
+export const PAYOFF_FORMULA = 'Payoff = 10 − your contribution + 2 × pot ÷ group size';
+
+export function pointsList(game, ctx = {}, cls = 'points') {
+  return h('ul', { class: cls }, POINTS[game](ctx).map((segs) => h('li', {}, segs.map((s) => (typeof s === 'string' ? s : h('mark', { class: 'hl' }, s.hl))))));
+}
+
+export function routeLegend(roadOpen) {
+  const routes = ['upper', 'lower', ...(roadOpen ? ['shortcut'] : [])];
+  return h('div', { class: 'legend' }, routes.map((k) => h('span', {}, h('i', { style: { background: ROUTE_META[k].color } }), `${ROUTE_META[k].label}: ${ROUTE_META[k].path}`)));
+}
 
 /**
  * Four-node network diagram. loads: {SA:{load,time},...} shows numbers after reveal.
@@ -91,7 +119,7 @@ export function networkSVG({ roadOpen, route = null, edges = null, N = null, onP
     return l;
   };
   for (const [id, a, b, label, side] of edgeDefs) {
-    if (id === 'AB' && !roadOpen && compact) { /* still draw faint */ }
+    if (id === 'AB' && !roadOpen) continue; // a closed road is simply not drawn
     const cls = ['edge', onRoute.has(id) ? 'on' : '', id === 'AB' && !roadOpen ? 'dashed' : ''].join(' ');
     const l = line(a, b, cls);
     if (id === 'AB' && !roadOpen) l.style.opacity = '0.35';

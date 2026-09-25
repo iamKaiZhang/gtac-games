@@ -1,4 +1,4 @@
-import { connect, h, $, clear, fmt, GAME_NAMES, STATUS_LABEL, ROUTE_META, INSTRUCTIONS, networkSVG, histogram, hbars } from './common.js';
+import { connect, h, $, clear, fmt, GAME_NAMES, STATUS_LABEL, ROUTE_META, networkSVG, histogram, hbars, pointsList, routeLegend, PAYOFF_FORMULA } from './common.js';
 
 const app = $('#app');
 const code = (location.pathname.match(/^\/screen\/([A-Za-z]{4})/) || [])[1]?.toUpperCase();
@@ -38,8 +38,8 @@ function render() {
   const side = h('div', {});
   if (r.status === 'open' || r.status === 'closed') side.append(renderProgress(r));
   if (r.status === 'revealed') side.append(renderHistory(r));
-  if (view.braess.theoryRevealed && view.braess.theory && r.game === 'braess') side.append(renderTheory(view.braess.theory));
-  app.append(h('div', { class: 'body' }, main, side));
+  if (view.braess.theoryRevealed && view.braess.theory && r.game === 'braess' && r.status === 'revealed') side.append(renderTheory(view.braess.theory));
+  app.append(h('div', { class: 'body' + (side.childElementCount ? '' : ' full') }, main, side));
 }
 
 function renderLobby() {
@@ -61,10 +61,22 @@ function renderProgress(r) {
 }
 
 function renderInstructions(r) {
-  const box = h('div', {}, h('h1', {}, `${GAME_NAMES[r.game]}`, h('span', { class: 'sub' }, ` · Round ${r.index}`)), h('p', {}, INSTRUCTIONS[r.game]));
-  if (r.game === 'beauty') box.append(h('p', { class: 'muted' }, 'Example: if the average of all numbers is 30, the target is 20.'));
-  if (r.game === 'braess') box.append(h('div', { class: 'card', style: { maxWidth: '760px' } }, networkSVG({ roadOpen: r.config.roadOpen })), h('p', {}, r.config.roadOpen ? 'The new road A → B is now open with travel time 0. A third route S → A → B → T is available.' : 'The road A → B is closed. Choose the upper route (S → A → T) or the lower route (S → B → T).'), h('p', { class: 'muted' }, 'x = number of drivers on S → A, y = number on B → T, N = number of drivers who submitted. Congestion depends on what the class actually chooses.'));
-  if (r.game === 'pgg') box.append(h('p', {}, `Payoff = 10 − your contribution + 2 × (group total) ÷ (group size).`), h('p', { class: 'muted' }, `${r.config.groupCount} groups (sizes ${r.config.sizes.join(', ')}). Your group is shown on your phone. Groups stay the same in every round.`));
+  const box = h('div', { class: 'slide' }, h('h1', {}, `${GAME_NAMES[r.game]}`, h('span', { class: 'sub' }, ` · Round ${r.index}`)));
+  if (r.game === 'beauty') {
+    box.append(pointsList('beauty'),
+      h('div', { class: 'callout' }, h('span', { class: 'muted' }, 'Example  '), 'average 30  →  target ', h('mark', { class: 'hl' }, '20')));
+  }
+  if (r.game === 'braess') {
+    box.append(h('div', { class: 'slide-cols' },
+      h('div', {}, pointsList('braess', { roadOpen: r.config.roadOpen })),
+      h('div', { class: 'card', style: { margin: 0 } }, networkSVG({ roadOpen: r.config.roadOpen }), routeLegend(r.config.roadOpen))),
+      h('p', { class: 'muted small-screen' }, 'x = drivers on S → A, y = drivers on B → T, N = drivers who submitted.'));
+  }
+  if (r.game === 'pgg') {
+    box.append(pointsList('pgg'),
+      h('div', { class: 'callout' }, PAYOFF_FORMULA),
+      h('p', { class: 'muted small-screen' }, `${r.config.groupCount} groups (sizes ${r.config.sizes.join(', ')}). Your group is shown on your phone and stays the same every round.`));
+  }
   return box;
 }
 

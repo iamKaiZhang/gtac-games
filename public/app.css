@@ -197,7 +197,7 @@ table.t td.num, table.t th.num { text-align: right; font-variant-numeric: tabula
 .screen .head .code { display: inline-block; font-size: 34px; font-weight: 600; letter-spacing: 0.18em; background: var(--dark); color: #fff; padding: 6px 18px 6px 22px; border-radius: 12px; margin-left: 12px; vertical-align: middle; }
 .screen .body { flex: 1; padding: 36px 40px; display: grid; grid-template-columns: 1fr 360px; gap: 32px; align-items: start; }
 .screen .body.full { grid-template-columns: 1fr; }
-.screen h1 { font-size: 48px; font-weight: 600; letter-spacing: -0.02em; }
+.screen h1 { font-size: 54px; font-weight: 600; letter-spacing: -0.02em; }
 .screen h1 .sub { color: var(--text-2); font-weight: 500; }
 .screen p, .screen li { font-size: 26px; }
 .screen .card { padding: 28px; }
@@ -233,3 +233,20 @@ table.t td.num, table.t th.num { text-align: right; font-variant-numeric: tabula
 }
 @media (max-width: 800px) { .session-grid { grid-template-columns: 1fr !important; } }
 .pill:empty { display: none; }
+
+/* slide-style instructions */
+.points { list-style: none; padding: 0; margin: 0 0 12px; }
+.points li { position: relative; padding-left: 26px; margin: 0 0 10px; line-height: 1.45; }
+.points li::before { content: ''; position: absolute; left: 4px; top: 0.62em; width: 9px; height: 9px; border-radius: 50%; background: var(--blue); }
+.points.compact li { font-size: 16px; margin-bottom: 8px; }
+.hl { background: var(--yellow-soft); color: var(--text); padding: 1px 7px; border-radius: 6px; font-weight: 600; white-space: nowrap; }
+.formula { display: inline-block; font-weight: 600; background: var(--surface-2); border-radius: 10px; padding: 10px 14px; font-size: 16px; margin: 4px 0 8px; }
+.callout { display: inline-block; font-weight: 500; background: var(--surface); border: 1px solid var(--line-soft); border-radius: 14px; padding: 14px 22px; margin-top: 8px; }
+.screen .slide h1 { margin-bottom: 24px; }
+.screen .points li { font-size: 34px; margin-bottom: 20px; padding-left: 44px; line-height: 1.35; }
+.screen .points li::before { width: 13px; height: 13px; left: 8px; top: 0.55em; }
+.screen .hl { padding: 2px 12px; border-radius: 10px; }
+.screen .callout { font-size: 34px; padding: 18px 28px; }
+.screen .slide-cols { display: grid; grid-template-columns: 1.15fr 1fr; gap: 32px; align-items: center; }
+.screen .small-screen { font-size: 22px; margin-top: 24px; }
+@media (max-width: 1100px) { .screen .slide-cols { grid-template-columns: 1fr; } }

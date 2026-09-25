@@ -1,4 +1,4 @@
-import { connect, h, $, clear, fmt, toast, GAME_NAMES, INSTRUCTIONS, ROUTE_META, networkSVG } from './common.js';
+import { connect, h, $, clear, fmt, toast, GAME_NAMES, ROUTE_META, networkSVG, pointsList, PAYOFF_FORMULA } from './common.js';
 
 const app = $('#app');
 const urlCode = (location.pathname.match(/^\/j\/([A-Za-z]{4})/) || [])[1];
@@ -121,7 +121,7 @@ function renderRound(r) {
   const title = h('div', { class: 'row between mb' }, h('h2', { style: { margin: 0 } }, `${GAME_NAMES[r.game]} · Round ${r.index}`), statusPill(r.status));
   card.append(title);
   if (r.status === 'waiting') {
-    card.append(h('div', { class: 'card accent' }, h('h3', {}, 'Instructions'), h('p', {}, INSTRUCTIONS[r.game]), gameExtras(r), h('p', { class: 'muted' }, 'Voting has not opened yet. Get ready…')));
+    card.append(h('div', { class: 'card accent' }, h('h3', {}, 'Instructions'), pointsList(r.game, { roadOpen: r.config.roadOpen }, 'points compact'), r.game === 'pgg' ? h('div', { class: 'formula' }, PAYOFF_FORMULA) : null, gameExtras(r), h('p', { class: 'muted', style: { marginTop: '12px' } }, 'Voting has not opened yet. Get ready…')));
   } else if (r.status === 'open') {
     card.append(renderForm(r));
   } else if (r.status === 'closed') {
@@ -138,7 +138,7 @@ function statusPill(s) {
 }
 
 function gameExtras(r) {
-  if (r.game === 'braess') return h('div', { class: 'mt' }, networkSVG({ roadOpen: r.config.roadOpen, compact: true }), h('p', { class: 'small muted' }, r.config.roadOpen ? 'The new road A → B is open (travel time 0).' : 'The road A → B is closed.'));
+  if (r.game === 'braess') return h('div', { class: 'mt' }, networkSVG({ roadOpen: r.config.roadOpen, compact: true }));
   if (r.game === 'pgg') {
     const g = r.config.myGroup;
     return g
@@ -169,7 +169,7 @@ function confirmation(r, describe) {
 
 function renderForm(r) {
   const box = h('div', { class: 'card' });
-  box.append(h('p', {}, INSTRUCTIONS[r.game]));
+  box.append(pointsList(r.game, { roadOpen: r.config.roadOpen }, 'points compact'));
   if (r.game === 'beauty') {
     const start = draft.roundId === r.id ? draft.value : (r.mine ? r.mine.value : '');
     const num = h('input', { class: 'input big-number', type: 'number', inputmode: 'numeric', min: 0, max: 100, step: 1, placeholder: '0–100', value: start });
@@ -193,7 +193,7 @@ function renderForm(r) {
       btn.disabled = !sel;
     };
     paint();
-    box.append(h('p', { class: 'small muted' }, r.config.roadOpen ? 'The new road A → B is open with travel time 0.' : 'The road A → B is closed in this round.'), diagramWrap, list, btn, confirmation(r, (v) => `${ROUTE_META[v].label} (${ROUTE_META[v].path})`));
+    box.append(diagramWrap, list, btn, confirmation(r, (v) => `${ROUTE_META[v].label} (${ROUTE_META[v].path})`));
   } else if (r.game === 'pgg') {
     const g = r.config.myGroup;
     if (!g) { box.append(h('div', { class: 'card warn' }, 'You are not in a group for this round, so you cannot contribute. Ask the instructor to regroup.')); return box; }
@@ -207,7 +207,7 @@ function renderForm(r) {
       btn.disabled = sel === null;
     };
     paint();
-    box.append(h('p', { class: 'small' }, h('b', {}, `Group ${g.index + 1}`), ` (${g.members.length} people): ${g.members.join(', ')}`), h('label', { class: 'mt' }, 'Tokens to contribute'), grid, info, btn, confirmation(r, (v) => `${v} token${v === 1 ? '' : 's'}`));
+    box.append(h('div', { class: 'formula' }, PAYOFF_FORMULA), h('p', { class: 'small mt' }, h('b', {}, `Group ${g.index + 1}`), ` (${g.members.length} people): ${g.members.join(', ')}`), h('label', { class: 'mt' }, 'Tokens to contribute'), grid, info, btn, confirmation(r, (v) => `${v} token${v === 1 ? '' : 's'}`));
   }
   return box;
 }

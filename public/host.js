@@ -1,4 +1,4 @@
-import { connect, h, $, clear, fmt, toast, GAME_NAMES, STATUS_LABEL, ROUTE_META, INSTRUCTIONS, networkSVG, histogram, hbars, PALETTE } from './common.js';
+import { connect, h, $, clear, fmt, toast, GAME_NAMES, STATUS_LABEL, ROUTE_META, networkSVG, histogram, hbars } from './common.js';
 
 const app = $('#app');
 let key = localStorage.getItem('gtc_host_key') || '';
